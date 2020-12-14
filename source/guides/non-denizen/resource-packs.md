@@ -192,15 +192,15 @@ Here is an example of the override, and the `custom_model_data` specified.
         "layer0": "item/wooden_sword"
     },
     "overrides": [
-        { "predicate": { "custom_model_data": 1}, "model": "item/custom/bandos_godsword" }
+        { "predicate": { "custom_model_data": 1}, "model": "item/custom/dserver_ubersword" }
     ]
 }
 ```
 
 *Note: Remember that objects and arrays are separated by commas.*
 The above example extends the item `wooden_sword` to have an additional item model when the item in-game has the mechanism applied.
-This file is located at: `/assets/minecraft/models/item/custom/bandos_godsword.json`.
-Valid `custom_model_data` entries are integers, up to larger integers available as opposed to the durability predicate.
+This file is located at: `/assets/minecraft/models/item/custom/dserver_ubersword.json`.
+Valid `custom_model_data` entries are integers, <span class="parens">(including larger integers, as opposed to the durability predicate which is more limited)</span>.
 An example of this file with multiple custom model data's specified looks like this:
 
 ```json
@@ -210,10 +210,10 @@ An example of this file with multiple custom model data's specified looks like t
         "layer0": "item/wooden_sword"
     },
     "overrides": [
-        { "predicate": { "custom_model_data": 1}, "model": "item/custom/bandos_godsword" },
-        { "predicate": { "custom_model_data": 2}, "model": "item/custom/zamorakian_godsword" },
-        { "predicate": { "custom_model_data": 3}, "model": "item/custom/saradomin_godsword" },
-        { "predicate": { "custom_model_data": 4}, "model": "item/custom/armadyl_godsword" }
+        { "predicate": { "custom_model_data": 1}, "model": "item/custom/dserver_ubersword" },
+        { "predicate": { "custom_model_data": 2}, "model": "item/custom/dserver_prosword" },
+        { "predicate": { "custom_model_data": 3}, "model": "item/custom/dserver_greatsword" },
+        { "predicate": { "custom_model_data": 4}, "model": "item/custom/dserver_decentsword" }
     ]
 }
 ```
@@ -221,7 +221,7 @@ An example of this file with multiple custom model data's specified looks like t
 #### Example File: `custom_item.json`
 
 Your custom item's model data file is something you may or may not adjust yourself.
-THere are plenty of options for modeling software available, two of which most commonly recommended are [Cubik Pro](https://cubik.studio/) and [BlockBench](https://blockbench.net/).
+There are plenty of options for modeling software available, two of which most commonly recommended are [Cubik Pro](https://cubik.studio/) and [BlockBench](https://blockbench.net/).
 Note that the software you use must be able to export the model to a `.json` file format.
 Cubik Pro specifically saves the model, and the respective image file, into it's correct locations and formats the model file correctly.
 When you place your custom item's model data into the location you direct it to in the above example, the top of your model file should look something like this:
@@ -229,12 +229,14 @@ When you place your custom item's model data into the location you direct it to 
 ```json
 {
 	"textures": {
-		"particle": "item/custom/handheld/bandos_godsword",
-		"texture": "item/custom/handheld/bandos_godsword"
+		"particle": "item/custom/handheld/dserver_ubersword",
+		"texture": "item/custom/handheld/dserver_ubersword"
 	},
 ```
 
-In the above example the `particle` and `texture` keys both point to the image files we will be saving at the directory: `/assets/minecraft/models/item/custom/bandos_godsword.png`.
+Note that you do still need any other parts of the JSON file, such as the `"parent"` key.
+
+In the above example the `particle` and `texture` keys both point to the image files we will be saving at the directory: `/assets/minecraft/textures/item/custom/handheld/dserver_ubersword.png`.
 
 ### Inside The Textures folder Directory
 
@@ -261,7 +263,7 @@ you can use the [`/ex` command](/guides/first-steps/ex-command) like this:
 The item script simply looks something like this:
 
 ```dscript_green
-BandosSword:
+UberSword:
     type: item
     material: wooden_sword
     mechanisms:
@@ -269,7 +271,7 @@ BandosSword:
 ```
 
 The `custom_model_data` is in-line with any other mechanisms you choose to specify with the custom item.
-You can give yourself the custom item just like any other item script, `/ex give BandosSword` or in any script with the `give` or `inventory` command.
+You can give yourself the custom item just like any other item script, `/ex give dserver_ubersword` or in any script with the `give` or `inventory` command.
 
 #### Custom Sounds
 
@@ -288,7 +290,7 @@ MyCustomSound:
 ### Tips, Tricks And Notes While You Create
 
 A very handy trial-and-error debugging tricks for creating resource packs is that you can actively edit the pack and view your changes in-game.
-One of the most common misconceptions of resource packs is that you need to have it saved as a `.ZIP`.
+One of the most common misconceptions of resource packs is that you need to have it saved as a `.zip`.
 FALSE! You can save this directly in your resource packs folder, edit and just reload!
 The default hotkey to reload your resource packs is `F3 + T`.
 
@@ -297,7 +299,7 @@ If you run across a flat purple and black square texture, this is the default Mi
 - If your item has shape but no texture, your model file's image path is misconfigured or you're missing the image file.
 - if your item is normal, your resource pack is not registering any changes made to the item.
 
-THere is an incredibly handy JSON formatter and Validator you can find [Here](https://jsonformatter.curiousconcept.com/) for checking your JSON data.
+There is an incredibly handy JSON formatter and Validator you can find [Here](https://jsonformatter.curiousconcept.com/) for checking your JSON data.
 Minecraft will give no indicators excluding broken texture images and models if your files are wrongly formatted.
 
 Custom textures, models and sounds can be placed within as many sub-folders as you would like. Remember to abide the lowercase sensitivity.
