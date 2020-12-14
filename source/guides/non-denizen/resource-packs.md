@@ -1,4 +1,4 @@
-Resource Packs - Custom Items And Sounds
+Resource Packs - Custom Items, Sounds, Font And More
 ----------------------------------------
 
 This page will answer some common questions from programmers interested in creating visually custom items and adding new sounds into a resource pack.
@@ -12,7 +12,7 @@ This guide primarily, details how to correctly format your resource pack, and th
 
 ### Inside The Root Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/`
+> Directory: `.minecraft/resourcepacks/my_resource_pack/`
 
 The main directory within your resource pack folder should contain both:
 - The `Assets` Folder - This is where all your files are placed.
@@ -37,11 +37,16 @@ Here is what it looks like inside:
 ##### pack.mcmeta File Key: `pack_format`
 
 This is the indicator to Minecraft what version this pack is.
+Pack formats cannot specify versions that exceed the version the client is on.
+The client couldn't possibly guess what a newer format may be,
+but can sometimes know how to use older formats.
 - `1` indicates versions `1.6` - `1.8`.
 - `2` indicates versions `1.9` - `1.10`,
 - `3` indicates versions `1.11` - `1.12`,
 - `4` indicates versions `1.13` - `1.14`,
-- `5` indicates versions `1.15` - `1.16`.
+- `5` indicates versions `1.15` - `1.16.1`,
+- `6` indicates versions `1.16.2` - `1.16.4`,
+- `7` presently indicates version `1.17`.
 
 ##### pack.mcmeta File Key: `description`
 
@@ -63,14 +68,29 @@ You can also google search for unicode characters.
 
 ### Inside The Assets Folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/`
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/`
 
-This directory should be empty except for the one folder directory: `minecraft`. 
+This directory should be empty except for the one folder > Directory: `minecraft`. 
 Toss it in and leave everything else out of here.
+
+#### Advanced: Custom Namespace
+Advanced users may utilize a namespace folder in this directory.
+The only benefit to this feature for items and models is organization on a wider scale than just subfolders within subfolders.
+Utilizing namespace specified directories for font prevents players from typing your custom image fonts by any reasonable means.
+Examples of why you would want to prevent this: 
+- [Black screen overlays, but on a sign](placeholder)
+- [Black screen overlays, but in the chat](placeholder)
+- [Fancy book images, but in the chat box](placeholder)
+When creating overrides, you still must use the base item model in the `minecraft` namespace directory.
+When pointing paths to files in your custom namespace, you must prefix it to every path that uses it.
+Example model override pointing to a model saved at `assets/denizen_pack/item/custom/dserver_ubersword.json`:
+```json
+{ "predicate": { "custom_model_data": 1}, "model": "denizen_pack:item/custom/dserver_ubersword" }
+```
 
 ### Inside The Minecraft Folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/minecraft/`
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/`
 
 Depending on what content you plan on changing, you can create any of the following folders:
 
@@ -84,20 +104,22 @@ Depending on what content you plan on changing, you can create any of the follow
 
 For Optifine support, it's recommended you join their discord and review their documentation at their [Github Source](https://github.com/sp614x/optifine/tree/master/OptiFineDoc/doc).
 
+\* *Note: Advanced users who opt using custom namespace directories also share these contents*
+
 #### Example File: `sounds.json`
 
 This file indexes where Minecraft should look for your sounds.
-Below is an example of a setup for two custom sounds, `defence_levelup0` and `defence_levelup1`.
+Below is an example of a setup for two custom sounds, `defence_levelup_0` and `defence_levelup_1`.
 
 ```json
 {
   "entity.player.defence.level": {
     "sounds": [
       {
-        "name": "custom/defence_levelup0"
+        "name": "custom/defence_levelup_0"
       },
       {
-        "name": "custom/defence_levelup1"
+        "name": "custom/defence_levelup_1"
       }
     ],
     "subtitle": "Excited Trumpet Noises"
@@ -141,25 +163,99 @@ Optionally, you can manually adjust the following valid properties of the sound:
 
 ### Inside The Blockstates Folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/minecraft/blockstates/`
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/blockstates/`
 
 To modify each individual block-state of an item, you must specify each individual blockstate.
 Additional blockstates cannot be specified.
 When specifying blockstate models, the relative folder directs to the `Models` directory, located at `/assets/minecraft/models/`.
 Adjusting these is not covered in this guide.
 
+### Model File Structuring
+
+It's important to know the structure of these files before entering the next two sections that guide you through creating and placing them within the pack.
+To "Create" new items, you will need to modify existing items within Minecraft.
+There are two model files you'll work with when creating items: The base item you are overriding and your newly modeled item.
+Your base files are found within the `assets/minecraft/models/item/` directory.
+These model files represent the item you override, and cannot be renamed as they are hardcoded into Minecraft.
+
+#### Model File Property: `parent`
+
+The parent key is important and you should not remove it unless you plan to replace the contents you remove by removing this property.
+Previewing different item models within the Minecraft default resource pack, you will find a variety of different parent files.
+For items, most use the parent `item/generated`, `item/handheld`, or `builtin/generated`.
+These files, excluding those that utilize the `builtin` directory, are also located in the same directory.
+The parent property is designed to minimize your model files by creating a basis for model files to follow suit(Hence the name "parent").
+Most visible properties Minecraft uses for parent files are for the `display` property, however many properties are left hardcoded.
+
+Advanced users can utilize the parent property to minimize the size of the resource pack.
+If a series of custom modeled items share the exact same model but different textures,
+you could for example place the model file's largest properties `elements` and `display` in a separate model file entirely,
+and define the `textures` property in each item's model file individually.
+
+#### Model File Property: `display`
+
+This property instructs how the item's display should be shown to the player.
+There are eight display positions:
+- `thirdperson_righthand` - This is for third-person view of the item when held by entities.
+- `thirdperson_lefthand` - This is for third-person view of the item when held by entities.
+- `firstperson_righthand` - This is for first-person view of the item.
+- `firstperson_lefthand` - This is for first-person view of the item.
+- `gui` - This is for the item when in an inventory or in the player's hotbar.
+- `head` - This is for the item when on an entity's head.
+- `ground` -  This is for `dropped_item` entities displaying this item, or this item dropped in general.
+- `fixed` - This is for the item when placed in an item_frame.
+
+For each display position, you can specify three properties that change the display you see:
+- `rotation` - Rotates the item around the three axis.
+- `translation` - Specifies an offset from a center point that the item is moved to display at. Input can be anything from `-80` to `80`.
+- `scale` - Specifies the scale of the model. Maximum upscale is `4`, default is `1`.
+
+\* *Note: Translation is applied to the model before rotation.*
+
+Here's an example of a valid display property:
+
+```json
+"head": {
+    "rotation": [ 0, 180, 0 ],
+    "translation": [ 0, 13, 7],
+    "scale":[ 1, 1, 1]
+},
+```
+
+If all three of the axes (such as the scale property above) are default or unchanged, you can remove them safely.
+
+#### Model File Property: `elements`
+
+The contents in this property are typically generated by your model software.
+This property is also typically very large, and can be safely left to your software to generate without modification.
+If you are only adding textures without custom models, this property can be left off.
+
+#### Model File Property: `Textures`
+
+The contents here indicate the path to find the textures used in this model file.
+The key used here is used for the `"texture": "#key"` property in the elements property.
+
+#### Model File Property: `gui_light`
+
+This property is rarely documented, but is incredibly important to prevent unwanted texturing for items.
+When creating custom items, you'll find that your item is slightly darker in-game than it was created to be.
+This is because all items are presented a level of light to shade the items.
+When left defaulted, the light is placed awkwardly in a way that makes your item look saturated.
+Valid values are `front` and `side`.
+Block models should typically use `side`, this allows blocks to have a nice shaded model.
+Flat item models should typically use `front`, this allows items to be given a clear GUI visual.
+
 ### Inside The Models Folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/minecraft/models/`
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/models/`
 
-To "Create" new items, you will need to modify existing items within Minecraft.
 This can and was previously done with Durability, but optimally utilized with `custom_model_data` that was implemented in Minecraft 1.14.
 The three object model types for model data are `Block States`,`Block Models`, and `Item Models`.
 Block States and Block Model data are not covered in this guide.
 
 #### Example File: `wooden_sword.json`
 
-Existing files such as `wooden_sword` for example, should look like this:
+Base model files such as `wooden_sword` for example, should look like this:
 
 ```json
 {
@@ -175,12 +271,12 @@ The `parent` key indicates the model data this file injects data for.
 The data's value for parent specified are the `FILEPATH/FILENAME` from the `models` directory if specifying a model file,
 and the `textures` directory if specifying a texture. 
 
-In the above example, the `wooden_sword` utilizes the parent model located at: `/assets/minecraft/textures/item/handheld.json`.
+In the above example, the `wooden_sword` utilizes the parent model located at: `/assets/minecraft/models/item/handheld.json`.
 In the above example, the `wooden_sword` utilizes the texture image located at: `/assets/minecraft/textures/item/wooden_sword.png`.
 
 Note that removing `parent` keys if you are not specifying all display properties of an item will return unexpected results.
-The `wooden_sword`, for example, utilizes the parent file `/assets/minecraft/textures/item/generated.json`;
-which also utilizes a parent file at `/assets/minecraft/textures/builtin/generated.json`.
+The `wooden_sword`, for example, utilizes the parent file `/assets/minecraft/models/item/generated.json`;
+which also utilizes a parent file at `/assets/minecraft/models/builtin/generated.json`.
 If these files do not exist altered in the pack, they utilize the respective existing file within Minecraft's default resource.
 To add the `custom_model_data` predicate, we specify this in the `Overrides` key.
 Here is an example of the override, and the `custom_model_data` specified.
@@ -197,7 +293,7 @@ Here is an example of the override, and the `custom_model_data` specified.
 }
 ```
 
-*Note: Remember that objects and arrays are separated by commas.*
+\* *Note: Remember that objects and arrays are separated by commas.*
 The above example extends the item `wooden_sword` to have an additional item model when the item in-game has the mechanism applied.
 This file is located at: `/assets/minecraft/models/item/custom/dserver_ubersword.json`.
 Valid `custom_model_data` entries are integers, <span class="parens">(including larger integers, as opposed to the durability predicate which is more limited)</span>.
@@ -236,22 +332,75 @@ When you place your custom item's model data into the location you direct it to 
 
 Note that you do still need any other parts of the JSON file, such as the `"parent"` key.
 
-In the above example the `particle` and `texture` keys both point to the image files we will be saving at the directory: `/assets/minecraft/textures/item/custom/handheld/dserver_ubersword.png`.
+In the above example the `particle` and `texture` keys both point to the image files we will be saving at the > Directory: `/assets/minecraft/textures/item/custom/handheld/dserver_ubersword.png`.
 
 ### Inside The Textures folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/minecraft/textures/`.
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/textures/`.
+
 This is where your image files are saved.
 These files should be in the relative filepath specified within the model file that it corresponds to.
 
 ### Inside The Sounds folder Directory
 
-Directory: `.minecraft/resourcepacks/MyResourcePack/assets/minecraft/sounds/`.
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/sounds/`.
+
 The sound format Minecraft uses is `.ogg`.
 Free converting tools can be found online, one recommended option being [Audio-Online-Convert.com.](https://audio.online-convert.com/convert-to-ogg).
 For organization's sake, if you're adding new sounds, it is recommended that you place them in a folder named `Custom`. Minecraft's default resource organizes it's sounds by [category](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/SoundCategory.html).
-You can find Minecraft's default resource sound index here: `/.minecraft/assets/indexes/1.15.json`; where `1.15` is the versions we're using in this guide.
+You can find Minecraft's default resource sound index here: `/.minecraft/assets/indexes/1.16.json`; where `1.16` is the version we're using in this guide.
 All of your sound files <span class="parens">('.ogg' files)</span> should be saved in this directory.
+
+### Inside The Font Folder Directory
+
+> Directory: `.minecraft/resourcepacks/my_resource_pack/assets/minecraft/fonts/`.
+
+Minecraft default uses the `default.json` file as the primary font used.
+Within this file is a root property named `providers`.
+Inside the providers property, we can specify three different types of font providers:
+- `bitmap` - Used to display images as text.
+- `legacy_unicode` - Deprecated and old don't use it.
+- `ttf` - Used to insert font styles using `.otf` and `.ttf` font files that you can download and import.
+
+The two main font providers have different pairs of properties available.
+For `bitmap` provider types:
+- `file` - This is the path to the image this font character will use, starting at `/assets/minecraft/textures`.
+- `height` - Optional property to adjust the height of the image. Can be negative, but the maximum is 256 minus the `acsent` specified, if any.
+- `ascent` - The vertical shift to the font image.
+- `chars` -  list of strings containing the characters used for an image map. The texture is split into one equally sized row for each element of this list. Each row is split into one equally sized character for each character within one list element.
+
+Additionally, image font providers are limited to `256`x`256` in size.
+
+#### Example File: `my_fancy_font.json`
+
+Here's an example of a correctly formatted font file:
+
+```json
+{
+    "providers": [
+        {
+            "type": "ttf",
+            "file": "negative_spaces.ttf",
+            "shift": [0.0, 0.0],
+            "size": 10.0,
+            "oversample": 1.0
+        },
+        {
+            "type": "bitmap",
+            "file": "logos/icon/letter_large.png",
+            "ascent": 0,
+            "height": 200,
+            "chars": [
+                "\u6900"
+            ]
+        }
+    ]
+}
+```
+
+This utilizes a custom font named `negative_spaces`, and adds an image to the unicode character `6900`.
+It's recommended when implementing large image font to use a file that is **not** the default.
+Doing so prevents regular players from typing 256x256 images in the chat, easily griefing other players.
 
 ### Putting It Together: Using Denizen With Your New Pack
 
@@ -287,17 +436,81 @@ MyCustomSound:
         - playsound <player> sound:entity.player.defence.level custom
 ```
 
-### Tips, Tricks And Notes While You Create
+#### Custom Font
+
+Custom font has a variety of different uses. Font that utilizes images can be displayed anywhere text can be displayed which includes:
+- books
+- signs
+- bossbars
+- the sidebar
+- entity names
+- actionbar messages
+- the player tablist
+- title and subtitles
+- item display names and item lore
+- the chatbox and chat hover event displays
+
+Just look at the possibilities:
+
+![image](placeholder)
+
+The only things you need to implement thse are these tags:
+- `<&chr[<character>]>` - where `<character>` is your unicode character used
+- `<ElementTag.font[<font>]>` - where `<font>` is your font file name
+- `<&font[<font>]>` - where `<font>` is your font file name
+
+The `<font>` input is a path starting from `assets/minecraft/font/`;
+Advanced users opting to use a namespace use `namespace:<font>`, which would use the path starting from `assets/namespace/font/`
+
+### Troubleshooting
+
+For most problems you encounter when creating your resource pack, basic users encounter a small number of problems.
+Here's a list of common issues, followed by good solution troubleshooting methods to resolve them.
+
+#### Item Problems: Nothing Changed Or Purple And Black Squares
+
+For all problems in this section, verify the following:
+- Verify your item's entire path is lowercase for folders and file names.
+- Verify your folder naming schemes - It's common to accidentally mix between different naming schemes using `items` instead of `item`, `model` instead of `model`, or `blocks` instead of `block`.
+- Verify your models use valid json, and are the correct file extensions. YAML is not valid JSON.
+- Verify your file path matches the correct folders used.
+
+If you've given your item the custom model data specified for your model and nothing happened, your resource pack is not registering any changes made to the item. 
+This is most commonly caused by assuming you can just dump model files blindly into the resource pack without using proper names.
+- Verify the original minecraft model file for the item you are overriding is in your resource pack and points to your model file as an override.
+- Verify your resource pack is not nested within another folder. The directory should start like this: `.minecraft/resourcepacks/my_resource_pack/assets/`
+
+If your item is displaying purple and black squares, you've just received Minecraft's missing texture. 
+Your problem is much easier than the previous problem to troubleshoot.
+If your item is flat with purple and black squares, your item's model is missing or misconfigured.
+- Most likely: Verify your base item's path correctly points to your new custom model file.
+
+If your item is a correctly modeled item but textured with purple and black squares, your item's textures are missing or misconfigured.
+This is most commonly caused by model software pre-generating your model file's texture pack incorrectly for your pack.
+- Most likely: Verify your model file's path correctly points to your new custom model's textures used.
+- Verify you did not include the file extension in the path.
+- Verify your `textures` property in the model file correctly matches the `texture` key in the elements property. Typically this shouldn't be touched to begin with unless you're proficiently replacing the text across the entire model file when doing so.
+
+Very rare problems:
+- If your texture contains an alpha layer / transparency but displays black instead, this item does not support transparent textures. Use a different item.
+- Compass and Clocks have multiple textures and models to override.
+
+#### Font Problems: Invisible Text Or Clear Squares
+
+placeholder
+
+#### Advanced Troubleshooting
+
+If the above all fail, ultimately you can resort to a verbose method of troubleshooting by checking your client logs.
+These are located by default in the `.minecraft/logs/` directory, labeled `latest.log`.
+If you use standard clients such as the vanilla client or Optifine, these logs do not contain personal information if you choose to share it with others.
+
+### Tips, Tricks, And Notes While You Create
 
 A very handy trial-and-error debugging tricks for creating resource packs is that you can actively edit the pack and view your changes in-game.
 One of the most common misconceptions of resource packs is that you need to have it saved as a `.zip`.
 FALSE! You can save this directly in your resource packs folder, edit and just reload!
 The default hotkey to reload your resource packs is `F3 + T`.
-
-If you run across a flat purple and black square texture, this is the default Minecraft missing data replacement. 
-- if your item is flat with the purple/black texture, your item's model file path is misconfigured or is missing.
-- If your item has shape but no texture, your model file's image path is misconfigured or you're missing the image file.
-- if your item is normal, your resource pack is not registering any changes made to the item.
 
 There is an incredibly handy JSON formatter and Validator you can find [Here](https://jsonformatter.curiousconcept.com/) for checking your JSON data.
 Minecraft will give no indicators excluding broken texture images and models if your files are wrongly formatted.
@@ -309,7 +522,7 @@ Your default Resource Packs folder is located in your default minecraft director
 Optimally, you can directly open the folder directory with the `Open Resource Pack Folder` button in the `Resource Packs...` section of your in-game menu.
 
 The best template for modifying existing models and textures for Minecraft is the default resource,
-which can be found in your Version Jar directly located in the directory: `/.minecraft/versions/`.
+which can be found in your Version Jar directly located in the > Directory: `/.minecraft/versions/`.
 You can extract this to it's respective file and locate the `Assets` folder within.
 Note that if you copy the entire `assets` folder as a template, you may consider removing material you don't change,
 as it's extra file storage you don't need to contribute to the resource pack.
